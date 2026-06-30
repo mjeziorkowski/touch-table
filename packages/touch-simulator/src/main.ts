@@ -47,6 +47,20 @@ function connect() {
   socket.onerror = (err) => {
     console.error('[Simulator] WebSocket error:', err);
   };
+
+  socket.onmessage = (event) => {
+    try {
+      const parsedMessage = JSON.parse(event.data) as SocketMessage;
+      if (parsedMessage.type === 'canvas-cast') {
+        container.style.backgroundImage = `url(${parsedMessage.image})`;
+        container.style.backgroundSize = 'contain';
+        container.style.backgroundPosition = 'center';
+        container.style.backgroundRepeat = 'no-repeat';
+      }
+    } catch (err) {
+      console.error('[Simulator] Error processing message:', err);
+    }
+  };
 }
 
 function sendMessage(msg: SocketMessage) {

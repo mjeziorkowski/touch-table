@@ -26,4 +26,5 @@ export type SocketMessage =
   | { type: 'touch-event'; touch: TouchPoint }
   | { type: 'state-update'; state: GameState }
   | { type: 'request-state' }
-  | { type: 'update-piece'; piece: GamePiece };
+  | { type: 'update-piece'; piece: GamePiece }
+  | { type: 'canvas-cast'; image: string };

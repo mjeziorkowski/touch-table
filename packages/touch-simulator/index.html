@@ -91,13 +91,22 @@
       border-radius: 8px;
       box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
       background-color: #000;
-      /* Grid background */
+      overflow: hidden;
+      cursor: crosshair;
+    }
+
+    #grid-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
       background-image: 
         linear-gradient(to right, rgba(255, 255, 255, 0.15) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
       background-size: 6.25% 11.11%; /* 16 columns by 9 rows */
-      overflow: hidden;
-      cursor: crosshair;
+      z-index: 1;
     }
 
     /* Target overlay coordinates output */
@@ -148,6 +157,7 @@
   </header>
 
   <div id="simulator-container">
+    <div id="grid-overlay"></div>
     <!-- Touch/Mouse events will be tracked here -->
   </div>
 

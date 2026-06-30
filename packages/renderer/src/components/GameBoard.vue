@@ -11,6 +11,7 @@ interface Props {
 const props = defineProps<Props>();
 const emit = defineEmits<{
   (e: 'piece-moved', piece: GamePiece): void;
+  (e: 'canvas-captured', image: string): void;
 }>();
 
 const canvasContainer = ref<HTMLDivElement | null>(null);
@@ -34,6 +35,7 @@ const touchIndicators = new Map<string, { mesh: THREE.Mesh; light: THREE.PointLi
 
 // Tracking drag state
 let draggedPieceId: string | null = null;
+let lastCaptureTime = 0;
 
 // Initialize Three.js scene
 function initThree() {
@@ -53,8 +55,8 @@ function initThree() {
   camera.position.set(0, 12, 10);
   camera.lookAt(0, 0, 0);
 
-  // Renderer
-  renderer = new THREE.WebGLRenderer({ antialias: true });
+  // Renderer - preserveDrawingBuffer allows taking snapshots for screen casting
+  renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
   renderer.setSize(width, height);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -329,6 +331,15 @@ function animate() {
   });
 
   renderer.render(scene, camera);
+
+  // Throttled WebGL Canvas screenshot capture (10 FPS)
+  if (now - lastCaptureTime > 100) {
+    lastCaptureTime = now;
+    if (renderer) {
+      const dataUrl = renderer.domElement.toDataURL('image/jpeg', 0.35);
+      emit('canvas-captured', dataUrl);
+    }
+  }
 }
 
 function onWindowResize() {

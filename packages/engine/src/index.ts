@@ -64,6 +64,12 @@ wss.on('connection', (ws: WebSocket) => {
           break;
         }
 
+        case 'canvas-cast': {
+          // Broadcast canvas frame from renderer to simulators
+          broadcastToType('simulator', JSON.stringify({ type: 'canvas-cast', image: parsedMessage.image }));
+          break;
+        }
+
         default:
           console.warn(`[Engine] Unknown message type: ${(parsedMessage as any).type}`);
       }
