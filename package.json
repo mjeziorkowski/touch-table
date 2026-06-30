@@ -1,0 +1,16 @@
+{
+  "name": "touch-table-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Game Board Simulator Monorepo using TV and IR touch frame",
+  "scripts": {
+    "dev:engine": "pnpm --filter engine dev",
+    "dev:simulator": "pnpm --filter touch-simulator dev",
+    "dev:renderer": "pnpm --filter renderer dev",
+    "dev": "pnpm run --parallel dev",
+    "build": "pnpm -r build"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

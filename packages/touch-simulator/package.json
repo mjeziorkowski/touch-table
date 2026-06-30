@@ -1,0 +1,16 @@
+{
+  "name": "touch-simulator",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 3001",
+    "build": "tsc && vite build"
+  },
+  "dependencies": {
+    "@touch-table/types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "vite": "^5.1.0"
+  }
+}
