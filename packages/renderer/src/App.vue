@@ -75,13 +75,6 @@ function handlePieceMoved(updatedPiece: GamePiece) {
   });
 }
 
-function handleCanvasCaptured(image: string) {
-  sendSocketMessage({
-    type: 'canvas-cast',
-    image
-  });
-}
-
 // Reset pieces to default configurations
 function resetBoard() {
   const defaults: GamePiece[] = [
@@ -135,7 +128,6 @@ onUnmounted(() => {
       :game-state="gameState" 
       :active-touch="activeTouch"
       @piece-moved="handlePieceMoved"
-      @canvas-captured="handleCanvasCaptured"
     />
   </div>
 </template>

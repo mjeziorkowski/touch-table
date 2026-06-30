@@ -1,10 +1,70 @@
 const container = document.getElementById('simulator-container');
+const canvas = document.getElementById('board-canvas');
+const ctx = canvas.getContext('2d');
 const statusEl = document.getElementById('status');
 const coordinatesEl = document.getElementById('coordinates');
 let socket = null;
 let reconnectInterval = null;
+let gameState = { pieces: [] };
 // Local active indicator elements
 const activeIndicators = new Map();
+function drawBoard() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    gameState.pieces.forEach(piece => {
+        // Map normalized state coordinates to 2D canvas size
+        const cx = piece.x * canvas.width;
+        const cy = piece.y * canvas.height;
+        const radius = piece.size * canvas.width;
+        // Premium aesthetics: neon glow outline
+        ctx.shadowColor = piece.color;
+        ctx.shadowBlur = 15;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.strokeStyle = piece.color;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius + 2, 0, Math.PI * 2);
+        ctx.stroke();
+        // Piece body shadow
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 4;
+        // Piece body fill
+        ctx.fillStyle = piece.color;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fill();
+        // Reset shadow
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+        // Inner highlight ring
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius - 3, 0, Math.PI * 2);
+        ctx.stroke();
+        // Center circle accent
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+        // Premium text label
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `bold ${Math.max(10, Math.round(radius * 0.45))}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        // Draw first name (e.g. "Red" instead of "Red Disc")
+        ctx.fillText(piece.name.split(' ')[0], cx, cy);
+    });
+}
+function resizeCanvas() {
+    const rect = container.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    drawBoard();
+}
+window.addEventListener('resize', resizeCanvas);
 function connect() {
     const wsUrl = `ws://${window.location.hostname}:3000`;
     console.log(`[Simulator] Connecting to Engine at ${wsUrl}`);
@@ -22,6 +82,8 @@ function connect() {
             type: 'register',
             clientType: 'simulator'
         });
+        // Initialize size
+        resizeCanvas();
     };
     socket.onclose = () => {
         console.log('[Simulator] Disconnected. Reconnecting...');
@@ -38,11 +100,9 @@ function connect() {
     socket.onmessage = (event) => {
         try {
             const parsedMessage = JSON.parse(event.data);
-            if (parsedMessage.type === 'canvas-cast') {
-                container.style.backgroundImage = `url(${parsedMessage.image})`;
-                container.style.backgroundSize = 'contain';
-                container.style.backgroundPosition = 'center';
-                container.style.backgroundRepeat = 'no-repeat';
+            if (parsedMessage.type === 'state-update') {
+                gameState = parsedMessage.state;
+                drawBoard();
             }
         }
         catch (err) {

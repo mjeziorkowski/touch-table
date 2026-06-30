@@ -30,10 +30,8 @@ wss.on('connection', (ws: WebSocket) => {
         case 'register': {
           clients.set(ws, parsedMessage.clientType);
           console.log(`[Engine] Client registered as: ${parsedMessage.clientType}`);
-          if (parsedMessage.clientType === 'renderer') {
-            // Send initial state to the newly registered renderer
-            ws.send(JSON.stringify({ type: 'state-update', state: gameState }));
-          }
+          // Send initial state to the newly registered client (renderer or simulator)
+          ws.send(JSON.stringify({ type: 'state-update', state: gameState }));
           break;
         }
 
@@ -53,20 +51,16 @@ wss.on('connection', (ws: WebSocket) => {
             gameState.pieces[pieceIdx] = updatedPiece;
             console.log(`[Engine] Piece "${updatedPiece.name}" updated to (${updatedPiece.x.toFixed(3)}, ${updatedPiece.y.toFixed(3)})`);
             
-            // Broadcast the state update to all renderers (except maybe the sender, but broadcasting to all is fine)
-            broadcastToType('renderer', JSON.stringify({ type: 'state-update', state: gameState }));
+            // Broadcast the state update to both renderers and simulators
+            const stateUpdateMsg = JSON.stringify({ type: 'state-update', state: gameState });
+            broadcastToType('renderer', stateUpdateMsg);
+            broadcastToType('simulator', stateUpdateMsg);
           }
           break;
         }
 
         case 'request-state': {
           ws.send(JSON.stringify({ type: 'state-update', state: gameState }));
-          break;
-        }
-
-        case 'canvas-cast': {
-          // Broadcast canvas frame from renderer to simulators
-          broadcastToType('simulator', JSON.stringify({ type: 'canvas-cast', image: parsedMessage.image }));
           break;
         }
 
